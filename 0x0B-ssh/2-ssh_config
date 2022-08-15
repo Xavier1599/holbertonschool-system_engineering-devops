@@ -21,7 +21,9 @@ Host *
 #   ForwardX11Trusted yes
 #   RhostsRSAAuthentication no
 #   RSAAuthentication yes
-    PasswordAuthentication no
+#   PermitRootLogin yes
+#	PasswordAuthentication yes
+#	ChallengeResponseAuthentication no
 #   HostbasedAuthentication no
 #   GSSAPIAuthentication no
 #   GSSAPIDelegateCredentials no
