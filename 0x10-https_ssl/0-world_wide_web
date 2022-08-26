@@ -8,10 +8,9 @@ domain_information () {
 if [ "$#" == 1 ]
 then
   domain_information "$1" "www"
-  domain_information "$1" "54.147.172.31"
-  domain_information "$1" "54.90.177.85"
-  domain_information "$1" "54.91.200.176"
-elif [ "$#" == 2 ]
-then
+  domain_information "$1" "lb-01"
+  domain_information "$1" "web-01"
+  domain_information "$1" "web-02"
+else
   domain_information "$1" "$2"
 fi
