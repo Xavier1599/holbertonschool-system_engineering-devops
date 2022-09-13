@@ -1,41 +1,43 @@
 #!/usr/bin/python3
-""" Queries REST API for employee info
-    argv 1 = int employee ID
 """
-if __name__ == "__main__":
-    import requests as r
-    from sys import argv
+    Given employee ID, returns information about his/her TODO list progress.
+"""
+import requests
+import sys
 
-    # Finds employee name by "id" param in /users/
-    name_q = r.get("https://jsonplaceholder.typicode.com/users/{}/"
-                   .format(argv[1]))
-    data = name_q.json()
-    employee_name = data.get("name")
+base_url = 'https://jsonplaceholder.typicode.com/'
 
-    # Finds employee tasks by "userID" param; /users/ & /todo/ are linked
-    url = "https://jsonplaceholder.typicode.com/users/1/todos/"
-    task_q = r.get(url, params={'userId': argv[1]})
-    data = task_q.json()
 
-    # Finds total number of tasks
-    task_total = len(data)
+def do_request():
+    '''Performs request'''
+    if len(sys.argv) < 2:
+        return print('USAGE:', __file__, '<employee id>')
+    eid = sys.argv[1]
+    try:
+        _eid = int(sys.argv[1])
+    except ValueError:
+        return print('Employee id must be an integer')
 
-    # Finds total number of completed tasks
-    task_completed = 0
-    for dicts in data:
-        for k, v in dicts.items():
-            if k == 'completed' and v is True:
-                    task_completed += 1
+    response = requests.get(base_url + 'users/' + eid)
+    if response.status_code == 404:
+        return print('User id not found')
+    elif response.status_code != 200:
+        return print('Error: status_code:', response.status_code)
+    user = response.json()
 
-    # Prints first line in specified format:
+    response = requests.get(base_url + 'todos/')
+    if response.status_code != 200:
+        return print('Error: status_code:', response.status_code)
+    todos = response.json()
 
-    print("Employee {} is done with tasks({}/{}):"
-          .format(employee_name, task_completed, task_total))
+    user_todos = [todo for todo in todos
+                  if todo.get('userId') == user.get('id')]
+    completed = [todo for todo in user_todos if todo.get('completed')]
+    print('Employee', user.get('name'),
+          'is done with tasks({}/{}):'.
+          format(len(completed), len(user_todos)))
+    [print('\t', todo.get('title')) for todo in completed]
 
-    # Prints subsequent lines as titles of completed tasks:
 
-    for dicts in data:
-        for k, v in dicts.items():
-            if k == 'completed' and v is True:
-                    print("\t {}".format(dicts['title']))
-
+if __name__ == '__main__':
+    do_request()
