@@ -1,34 +1,36 @@
 #!/usr/bin/python3
-""" Queries REST API for all employee info, exports to JSON
-"""
-if __name__ == "__main__":
-    import json
-    import requests as r
+"""Python script to export data in the JSON format"""
+import json
+import requests
 
-    user_q = r.get("https://jsonplaceholder.typicode.com/users")
-    user_data = user_q.json()
-    json_data = {}
-
-    for user in user_data:
-        username = user.get("username")
-        user_id = str(user.get("id"))
-        url = "https://jsonplaceholder.typicode.com/todos?userId=" + user_id
-        task_q = r.get(url)
-        task_data = task_q.json()
+base_url = 'https://jsonplaceholder.typicode.com/'
 
 
-        json_dict = {}
-        json_list = []
+def do_request():
+    '''Performs request'''
+    response = requests.get(base_url + 'users/')
+    if response.status_code != 200:
+        return print('Error: status_code:', response.status_code)
+    users = response.json()
 
-        for elem in task_data:
-            json_dict["task"] = elem.get("title")
-            json_dict["completed"] = elem.get("completed")
-            json_dict["username"] = username
-            json_list.append(json_dict)
-            json_dict = {}
+    response = requests.get(base_url + 'todos/')
+    if response.status_code != 200:
+        return print('Error: status_code:', response.status_code)
+    todos = response.json()
 
-        json_data[user_id] = json_list
+    data = {}
+    for user in users:
+        user_todos = [todo for todo in todos
+                      if todo.get('userId') == user.get('id')]
+        user_todos = [{'username': user.get('username'),
+                       'task': todo.get('title'),
+                       'completed': todo.get('completed')}
+                      for todo in user_todos]
+        data[str(user.get('id'))] = user_todos
 
-    with open("todo_all_employees.json", 'w') as jsonfile:
-        json.dump(json_data, jsonfile)
+    with open('todo_all_employees.json', 'w') as file:
+        json.dump(data, file)
 
+
+if __name__ == '__main__':
+    do_request()
