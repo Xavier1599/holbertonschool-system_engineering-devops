@@ -9,13 +9,13 @@ import sys
 
 def top_ten(subreddit):
 
-    url = 'https://www.reddit.com/r/[subreddit]/hot.json'.format(subreddit)
-    header = {'User-agent': 'Xavier Perez'}
-    size_limit = {"limit": 10}
-    r = requests.get(url, params=size_limit, headers=header).json()
+    url = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
+    headers = {'User-agent': 'Custom Agent'}
+    size = {"limit": 10}
+    r = requests.get(url, params=size, headers=headers).json()
     child = r.get('data', {}).get('children', None)
     if child:
         for results in child:
-            print(results.get('data').get('tiltle'))
+            print(results.get('data').get('title'))
     else:
         print(None)
